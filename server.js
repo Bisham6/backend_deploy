@@ -1,27 +1,32 @@
 const express = require("express");
 const http = require("http");
 const mongoose = require("mongoose");
-var cors = require("cors");
+const cors = require("cors");
 const app = express();
 const server = http.createServer(app);
-require("dotenv").config();
-app.use(cors());
+const mainRoute = require("./routes/mainRoute");
 const port = process.env.PORT || 3000;
 
-console.log(port, "PORT");
+require("dotenv").config();
 
-// MongoDB Connection (adjust your MongoDB URL)
-// mongoose.connect('mongodb://127.0.0.1:27017/meanDb', { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then(() => console.log('MongoDB connected'))
-//   .catch(err => console.error('MongoDB connection error:', err));
+// Enable CORS **before** defining routes
+app.use(cors());
 
+// Middleware for JSON parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Define routes after CORS middleware
+app.use("/", mainRoute);
+
+// MongoDB connection
 mongoose
   .connect(process.env.DB_URL)
   .then(() => console.log("Connection to DB successful!"))
   .catch((err) => console.log(err));
 
 // Basic route
-app.get("/api/data", (req, res) => {
+app.get("/", (req, res) => {
   res.json({
     message: "Hello from the MEAN API!",
   });
